@@ -1,24 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using LocResLib.Hashing;
 
-namespace LocresLib
+namespace LocResLib
 {
-    public class LocresString
+    public class LocResString
     {
-        public string Key { get; set; }
-        public string Value { get; set; }
-
         /// <summary>
-        /// <see cref="Crc.StrCrc32"/> hash of source string.
+        /// The key.
         /// </summary>
-        public uint SourceStringHash { get; } 
-
-        public LocresString(string key, string value, uint sourceStringHash)
+        public string Key { get; set; }
+        /// <summary>
+        /// The value.
+        /// </summary>
+        public string Value { get; set; }
+        /// <summary>
+        /// The <see cref="Crc.StrCrc32"/> hash of original value.
+        /// </summary>
+        public uint Hash { get; }
+        /// <summary>
+        /// The constructor.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="hash">The <see cref="Crc.StrCrc32"/> hash of original value.</param>
+        public LocResString(string key, string value, uint hash)
         {
             Key = key ?? throw new ArgumentNullException(nameof(key));
             Value = value ?? throw new ArgumentNullException(nameof(value));
-            SourceStringHash = sourceStringHash;
+            Hash = hash;
         }
     }
 }

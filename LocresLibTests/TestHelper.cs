@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using LocResLib;
+using System;
 using System.IO;
 using System.Linq;
-using System.Text;
-
-using LocresLib;
 
 namespace LocresLib.Tests
 {
@@ -19,12 +16,12 @@ namespace LocresLib.Tests
             return Path.Combine(projectPath, "Data");
         }
 
-        public static LocresFile LoadTestFile(string filename)
+        public static LocResFile LoadTestFile(string filename)
         {
             var filePath = Path.Combine(GetTestDataDirectory(), filename);
             using (var file = File.OpenRead(filePath))
             {
-                var locres = new LocresFile();
+                var locres = new LocResFile();
                 locres.Load(file);
 
                 return locres;

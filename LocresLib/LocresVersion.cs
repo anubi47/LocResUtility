@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LocresLib
+﻿namespace LocResLib
 {
     /// <summary>
     ///     Data versions for LocRes files.
@@ -10,7 +6,7 @@ namespace LocresLib
     ///         https://github.com/EpicGames/UnrealEngine/blob/master/Engine/Source/Runtime/Core/Public/Internationalization/TextLocalizationResourceVersion.h
     ///     </para>
     /// </summary>
-    public enum LocresVersion : byte
+    public enum LocResVersion : byte
     {
         /// <summary>
         ///     Legacy format file - will be missing the magic number.

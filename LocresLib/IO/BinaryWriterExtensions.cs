@@ -1,33 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
+using System.Linq;
 using System.Text;
 
-namespace LocresLib.IO
+namespace LocResLib.IO
 {
     public static class BinaryWriterExtensions
     {
-        internal static bool IsAsciiString(string value)
+        /// <summary>
+        /// Writes Unreal format string
+        /// </summary>
+        /// <param name="value">String to save</param>
+        /// <param name="type">0 = ASCII, 1 = UNICODE, 2 = Forced ASCII</param>
+        /// <returns></returns>
+        internal static void WriteUnrealString(this BinaryWriter writer, string value, LocResEncoding type = LocResEncoding.Auto)
         {
-            for (int i = 0; i < value.Length; i++)
-                if (value[i] > 127) return false;
-            return true;
-        }
-        
-        internal static void WriteUnrealString(this BinaryWriter writer, string value, bool forceUnicode = false)
-        {
-            value += "\x00";
-
-            if (!forceUnicode && IsAsciiString(value)) // ASCII
+            value += "\0";
+            if (( type == LocResEncoding.Auto && value.All(ch => ch < 128) ) || type == LocResEncoding.ForceASCII)
             {
+                // ASCII
+                if (type == LocResEncoding.ForceASCII) {
+                    // This strips all non-ASCII characters from a string
+                    value = Encoding.ASCII.GetString(
+                        Encoding.Convert(
+                            Encoding.UTF8,
+                            Encoding.GetEncoding(
+                                Encoding.ASCII.EncodingName,
+                                new EncoderReplacementFallback(string.Empty),
+                                new DecoderExceptionFallback()
+                                ),
+                            Encoding.UTF8.GetBytes(value)
+                        )
+                    );
+                }
                 var data = Encoding.ASCII.GetBytes(value);
                 writer.Write(data.Length);
                 writer.Write(data);
             }
-            else // UTF-16-LE
+            else
             {
+                // UCS2 as UTF-16-LE
                 var data = Encoding.Unicode.GetBytes(value);
-                writer.Write(value.Length * -1);
+                writer.Write(-1 * value.Length);
                 writer.Write(data);
             }
         }

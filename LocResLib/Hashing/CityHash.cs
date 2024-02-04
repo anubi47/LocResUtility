@@ -35,9 +35,9 @@ using System.Text;
 using uint8 = System.Byte;
 using uint32 = System.UInt32;
 using uint64 = System.UInt64;
-using uint128 = LocresLib.UInt128;
+using uint128 = LocResLib.Hashing.UInt128;
 
-namespace LocresLib
+namespace LocResLib.Hashing
 {
     /// <summary>
     ///     UE4 CityHash managed impl.
@@ -63,10 +63,10 @@ namespace LocresLib
         {
             // Murmur-inspired hashing.
             const ulong kMul = 0x9ddfea08eb382d69;
-            ulong a = (x.Low ^ x.High)*kMul;
-            a ^= (a >> 47);
-            ulong b = (x.High ^ a)*kMul;
-            b ^= (b >> 47);
+            ulong a = (x.Low ^ x.High) * kMul;
+            a ^= a >> 47;
+            ulong b = (x.High ^ a) * kMul;
+            b ^= b >> 47;
             b *= kMul;
             return b;
         }
@@ -74,23 +74,23 @@ namespace LocresLib
         private static uint32 ByteSwapUInt32(uint32 x)
         {
             return
-                (x >> 24) |
-                ((x & 0x00ff0000) >> 8) |
-                ((x & 0x0000ff00) << 8) |
-                (x << 24);
+                x >> 24 |
+                (x & 0x00ff0000) >> 8 |
+                (x & 0x0000ff00) << 8 |
+                x << 24;
         }
 
         private static uint64 ByteSwapUInt64(uint64 x)
         {
             return
-                (x >> 56) |
-                ((x & 0x00ff000000000000UL) >> 40) |
-                ((x & 0x0000ff0000000000UL) >> 24) |
-                ((x & 0x000000ff00000000UL) >> 8) |
-                ((x & 0x00000000ff000000UL) << 8) |
-                ((x & 0x0000000000ff0000UL) << 24) |
-                ((x & 0x000000000000ff00UL) << 40) |
-                (x << 56);
+                x >> 56 |
+                (x & 0x00ff000000000000UL) >> 40 |
+                (x & 0x0000ff0000000000UL) >> 24 |
+                (x & 0x000000ff00000000UL) >> 8 |
+                (x & 0x00000000ff000000UL) << 8 |
+                (x & 0x0000000000ff0000UL) << 24 |
+                (x & 0x000000000000ff00UL) << 40 |
+                x << 56;
         }
 
         private static uint64 Fetch64(byte[] p, int index)
@@ -101,7 +101,7 @@ namespace LocresLib
 
         private static uint64 Fetch64(byte[] p, uint index)
         {
-            return Fetch64(p, (int) index);
+            return Fetch64(p, (int)index);
         }
 
         private static uint32 Fetch32(byte[] p, int index)
@@ -112,7 +112,7 @@ namespace LocresLib
 
         private static uint32 Fetch32(byte[] p, uint index)
         {
-            return Fetch32(p, (int) index);
+            return Fetch32(p, (int)index);
         }
 
         // A 32-bit to 32-bit integer hash copied from Murmur3.
@@ -129,7 +129,7 @@ namespace LocresLib
         private static uint32 Rotate32(uint32 val, int shift)
         {
             // Avoid shifting by 32: doing so yields an undefined result.
-            return shift == 0 ? val : ((val >> shift) | (val << (32 - shift)));
+            return shift == 0 ? val : val >> shift | val << 32 - shift;
         }
 
         private static void Permute3<T>(ref T a, ref T b, ref T c)
@@ -153,12 +153,12 @@ namespace LocresLib
             a *= C2;
             h ^= a;
             h = Rotate32(h, 19);
-            return h*5 + 0xe6546b64;
+            return h * 5 + 0xe6546b64;
         }
 
         private static uint32 Hash32Len13To24(byte[] s)
         {
-            uint len = (uint) s.Length;
+            uint len = (uint)s.Length;
             uint32 a = Fetch32(s, (len >> 1) - 4);
             uint32 b = Fetch32(s, 4);
             uint32 c = Fetch32(s, len - 8);
@@ -171,12 +171,12 @@ namespace LocresLib
 
         private static uint32 Hash32Len0To4(byte[] s)
         {
-            uint len = (uint) s.Length;
+            uint len = (uint)s.Length;
             uint32 b = 0;
             uint32 c = 9;
             for (int i = 0; i < len; i++)
             {
-                b = b*C1 + (uint) ((sbyte) s[i]);
+                b = b * C1 + (uint)(sbyte)s[i];
                 c ^= b;
             }
             return Fmix(Mur(b, Mur(len, c)));
@@ -184,11 +184,11 @@ namespace LocresLib
 
         private static uint32 Hash32Len5To12(byte[] s)
         {
-            uint len = (uint) s.Length;
-            uint32 a = len, b = len*5, c = 9, d = b;
+            uint len = (uint)s.Length;
+            uint32 a = len, b = len * 5, c = 9, d = b;
             a += Fetch32(s, 0);
             b += Fetch32(s, len - 4);
-            c += Fetch32(s, ((len >> 1) & 4));
+            c += Fetch32(s, len >> 1 & 4);
             return Fmix(Mur(c, Mur(b, Mur(a, d))));
         }
 
@@ -206,76 +206,76 @@ namespace LocresLib
 
         public static uint32 CityHash32(byte[] s)
         {
-            uint len = (uint) s.Length;
+            uint len = (uint)s.Length;
             if (len <= 24)
             {
                 return len <= 12
-                    ? (len <= 4 ? Hash32Len0To4(s) : Hash32Len5To12(s))
+                    ? len <= 4 ? Hash32Len0To4(s) : Hash32Len5To12(s)
                     : Hash32Len13To24(s);
             }
             // len > 24
-            uint32 h = len, g = C1*len, f = g;
+            uint32 h = len, g = C1 * len, f = g;
             {
-                uint32 a0 = Rotate32(Fetch32(s, len - 4)*C1, 17)*C2;
-                uint32 a1 = Rotate32(Fetch32(s, len - 8)*C1, 17)*C2;
-                uint32 a2 = Rotate32(Fetch32(s, len - 16)*C1, 17)*C2;
-                uint32 a3 = Rotate32(Fetch32(s, len - 12)*C1, 17)*C2;
-                uint32 a4 = Rotate32(Fetch32(s, len - 20)*C1, 17)*C2;
+                uint32 a0 = Rotate32(Fetch32(s, len - 4) * C1, 17) * C2;
+                uint32 a1 = Rotate32(Fetch32(s, len - 8) * C1, 17) * C2;
+                uint32 a2 = Rotate32(Fetch32(s, len - 16) * C1, 17) * C2;
+                uint32 a3 = Rotate32(Fetch32(s, len - 12) * C1, 17) * C2;
+                uint32 a4 = Rotate32(Fetch32(s, len - 20) * C1, 17) * C2;
                 h ^= a0;
                 h = Rotate32(h, 19);
-                h = h*5 + 0xe6546b64;
+                h = h * 5 + 0xe6546b64;
                 h ^= a2;
                 h = Rotate32(h, 19);
-                h = h*5 + 0xe6546b64;
+                h = h * 5 + 0xe6546b64;
                 g ^= a1;
                 g = Rotate32(g, 19);
-                g = g*5 + 0xe6546b64;
+                g = g * 5 + 0xe6546b64;
                 g ^= a3;
                 g = Rotate32(g, 19);
-                g = g*5 + 0xe6546b64;
+                g = g * 5 + 0xe6546b64;
                 f += a4;
                 f = Rotate32(f, 19);
-                f = f*5 + 0xe6546b64;
+                f = f * 5 + 0xe6546b64;
             }
-            uint iters = (len - 1)/20;
+            uint iters = (len - 1) / 20;
             uint offset = 0;
             do
             {
-                uint32 a0 = Rotate32(Fetch32(s, offset)*C1, 17)*C2;
+                uint32 a0 = Rotate32(Fetch32(s, offset) * C1, 17) * C2;
                 uint32 a1 = Fetch32(s, offset + 4);
-                uint32 a2 = Rotate32(Fetch32(s, offset + 8)*C1, 17)*C2;
-                uint32 a3 = Rotate32(Fetch32(s, offset + 12)*C1, 17)*C2;
+                uint32 a2 = Rotate32(Fetch32(s, offset + 8) * C1, 17) * C2;
+                uint32 a3 = Rotate32(Fetch32(s, offset + 12) * C1, 17) * C2;
                 uint32 a4 = Fetch32(s, offset + 16);
                 h ^= a0;
                 h = Rotate32(h, 18);
-                h = h*5 + 0xe6546b64;
+                h = h * 5 + 0xe6546b64;
                 f += a1;
                 f = Rotate32(f, 19);
-                f = f*C1;
+                f = f * C1;
                 g += a2;
                 g = Rotate32(g, 18);
-                g = g*5 + 0xe6546b64;
+                g = g * 5 + 0xe6546b64;
                 h ^= a3 + a1;
                 h = Rotate32(h, 19);
-                h = h*5 + 0xe6546b64;
+                h = h * 5 + 0xe6546b64;
                 g ^= a4;
-                g = ByteSwapUInt32(g)*5;
-                h += a4*5;
+                g = ByteSwapUInt32(g) * 5;
+                h += a4 * 5;
                 h = ByteSwapUInt32(h);
                 f += a0;
                 Permute3(ref f, ref h, ref g);
                 offset += 20;
             } while (--iters != 0);
-            g = Rotate32(g, 11)*C1;
-            g = Rotate32(g, 17)*C1;
-            f = Rotate32(f, 11)*C1;
-            f = Rotate32(f, 17)*C1;
+            g = Rotate32(g, 11) * C1;
+            g = Rotate32(g, 17) * C1;
+            f = Rotate32(f, 11) * C1;
+            f = Rotate32(f, 17) * C1;
             h = Rotate32(h + g, 19);
-            h = h*5 + 0xe6546b64;
-            h = Rotate32(h, 17)*C1;
+            h = h * 5 + 0xe6546b64;
+            h = Rotate32(h, 17) * C1;
             h = Rotate32(h + f, 19);
-            h = h*5 + 0xe6546b64;
-            h = Rotate32(h, 17)*C1;
+            h = h * 5 + 0xe6546b64;
+            h = Rotate32(h, 17) * C1;
             return h;
         }
 
@@ -284,12 +284,12 @@ namespace LocresLib
         private static uint64 Rotate(uint64 val, int shift)
         {
             // Avoid shifting by 64: doing so yields an undefined result.
-            return shift == 0 ? val : ((val >> shift) | (val << (64 - shift)));
+            return shift == 0 ? val : val >> shift | val << 64 - shift;
         }
 
         private static uint64 ShiftMix(uint64 val)
         {
-            return val ^ (val >> 47);
+            return val ^ val >> 47;
         }
 
         private static uint64 HashLen16(uint64 u, uint64 v)
@@ -300,10 +300,10 @@ namespace LocresLib
         private static uint64 HashLen16(uint64 u, uint64 v, uint64 mul)
         {
             // Murmur-inspired hashing.
-            uint64 a = (u ^ v)*mul;
-            a ^= (a >> 47);
-            uint64 b = (v ^ a)*mul;
-            b ^= (b >> 47);
+            uint64 a = (u ^ v) * mul;
+            a ^= a >> 47;
+            uint64 b = (v ^ a) * mul;
+            b ^= b >> 47;
             b *= mul;
             return b;
         }
@@ -324,16 +324,16 @@ namespace LocresLib
             {
                 uint64 mul = K2 + (uint)len * 2;
                 uint64 a = Fetch32(s, offset);
-                return HashLen16((uint) len + (a << 3), Fetch32(s, offset + len - 4), mul); // added mul
+                return HashLen16((uint)len + (a << 3), Fetch32(s, offset + len - 4), mul); // added mul
             }
             if (len > 0)
             {
                 uint8 a = s[offset];
                 uint8 b = s[offset + (len >> 1)];
                 uint8 c = s[offset + (len - 1)];
-                uint32 y = a + ((uint32) b << 8);
-                uint32 z = (uint) len + ((uint32) c << 2);
-                return ShiftMix(y*K2 ^ z*K0)*K2;  // z*K3 -> z*K0 (why?)
+                uint32 y = a + ((uint32)b << 8);
+                uint32 z = (uint)len + ((uint32)c << 2);
+                return ShiftMix(y * K2 ^ z * K0) * K2;  // z*K3 -> z*K0 (why?)
             }
             return K2;
         }
@@ -342,9 +342,9 @@ namespace LocresLib
         // in that case.
         private static uint64 HashLen17To32(byte[] s)
         {
-            uint len = (uint) s.Length;
+            uint len = (uint)s.Length;
             uint64 mul = K2 + len * 2;
-            uint64 a = Fetch64(s, 0)*K1;
+            uint64 a = Fetch64(s, 0) * K1;
             uint64 b = Fetch64(s, 8);
             uint64 c = Fetch64(s, len - 8) * mul;
             uint64 d = Fetch64(s, len - 16) * K2;
@@ -392,7 +392,7 @@ namespace LocresLib
             uint64 g = Fetch64(s, len - 8);
             uint64 h = Fetch64(s, len - 16) * mul;
             uint64 u = Rotate(a + g, 43) + (Rotate(b, 30) + c) * 9;
-            uint64 v = ((a + g) ^ d) + f + 1;
+            uint64 v = (a + g ^ d) + f + 1;
             uint64 w = ByteSwapUInt64((u + v) * mul) + h;
             uint64 x = Rotate(e + f, 42) + c;
             uint64 y = (ByteSwapUInt64((v + w) * mul) + g) * mul;
@@ -433,28 +433,28 @@ namespace LocresLib
             // loop we keep 56 bytes of state: v, w, x, y, and z.
             uint64 x = Fetch64(s, len - 40);
             uint64 y = Fetch64(s, len - 16) + Fetch64(s, len - 56);
-            uint64 z = HashLen16(Fetch64(s, len - 48) + (ulong) len, Fetch64(s, len - 24));
-            uint128 v = WeakHashLen32WithSeeds(s, len - 64, (ulong) len, z);
+            uint64 z = HashLen16(Fetch64(s, len - 48) + (ulong)len, Fetch64(s, len - 24));
+            uint128 v = WeakHashLen32WithSeeds(s, len - 64, (ulong)len, z);
             uint128 w = WeakHashLen32WithSeeds(s, len - 32, y + K1, x);
-            x = x*K1 + Fetch64(s, 0);
+            x = x * K1 + Fetch64(s, 0);
 
             // Decrease len to the nearest multiple of 64, and operate on 64-byte chunks.
-            len = (s.Length - 1) & ~63;
+            len = s.Length - 1 & ~63;
             int offset = 0;
             do
             {
-                x = Rotate(x + y + v.Low + Fetch64(s, offset + 8), 37)*K1;
-                y = Rotate(y + v.High + Fetch64(s, offset + 48), 42)*K1;
+                x = Rotate(x + y + v.Low + Fetch64(s, offset + 8), 37) * K1;
+                y = Rotate(y + v.High + Fetch64(s, offset + 48), 42) * K1;
                 x ^= w.High;
                 y += v.Low + Fetch64(s, offset + 40);
-                z = Rotate(z + w.Low, 33)*K1;
-                v = WeakHashLen32WithSeeds(s, offset, v.High*K1, x + w.Low);
+                z = Rotate(z + w.Low, 33) * K1;
+                v = WeakHashLen32WithSeeds(s, offset, v.High * K1, x + w.Low);
                 w = WeakHashLen32WithSeeds(s, offset + 32, z + w.High, y + Fetch64(s, offset + 16));
                 Swap(ref z, ref x);
                 offset += 64;
                 len -= 64;
             } while (len != 0);
-            return HashLen16(HashLen16(v.Low, w.Low) + ShiftMix(y)*K1 + z,
+            return HashLen16(HashLen16(v.Low, w.Low) + ShiftMix(y) * K1 + z,
                 HashLen16(v.High, w.High) + x);
         }
 
@@ -499,16 +499,16 @@ namespace LocresLib
 
     public class UInt128
     {
-        public UInt128(UInt64 low, UInt64 high)
+        public UInt128(uint64 low, uint64 high)
         {
             Low = low;
             High = high;
         }
 
-        public UInt64 Low { get; set; }
-        public UInt64 High { get; set; }
+        public uint64 Low { get; set; }
+        public uint64 High { get; set; }
 
-        protected bool Equals(UInt128 other)
+        protected bool Equals(uint128 other)
         {
             return Low == other.Low && High == other.High;
         }
@@ -518,14 +518,14 @@ namespace LocresLib
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((UInt128)obj);
+            return Equals((uint128)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return (Low.GetHashCode() * 397) ^ High.GetHashCode();
+                return Low.GetHashCode() * 397 ^ High.GetHashCode();
             }
         }
     }

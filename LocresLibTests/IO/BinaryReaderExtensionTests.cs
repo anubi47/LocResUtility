@@ -1,10 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using LocResLib.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
-
-using LocresLib.IO;
 
 namespace LocresLib.IO.Tests
 {

@@ -1,10 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using LocResLib.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
-
-using LocresLib.IO;
 
 namespace UnrealLocres.IO.Tests
 {

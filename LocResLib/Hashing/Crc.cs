@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LocresLib
+﻿namespace LocResLib.Hashing
 {
     public static class Crc
     {
@@ -69,13 +65,13 @@ namespace LocresLib
             for (int i = 0; i < value.Length; i++)
             {
                 char ch = value[i];
-                CRC = (CRC >> 8) ^ CRCTable[(CRC ^ ch) & 0xFF];
+                CRC = CRC >> 8 ^ CRCTable[(CRC ^ ch) & 0xFF];
                 ch >>= 8;
-                CRC = (CRC >> 8) ^ CRCTable[(CRC ^ ch) & 0xFF];
+                CRC = CRC >> 8 ^ CRCTable[(CRC ^ ch) & 0xFF];
                 ch >>= 8;
-                CRC = (CRC >> 8) ^ CRCTable[(CRC ^ ch) & 0xFF];
+                CRC = CRC >> 8 ^ CRCTable[(CRC ^ ch) & 0xFF];
                 ch >>= 8;
-                CRC = (CRC >> 8) ^ CRCTable[(CRC ^ ch) & 0xFF];
+                CRC = CRC >> 8 ^ CRCTable[(CRC ^ ch) & 0xFF];
             }
             return ~CRC;
         }
