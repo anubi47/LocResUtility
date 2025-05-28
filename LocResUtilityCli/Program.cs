@@ -7,6 +7,7 @@ using LocResCore.Excel.Translations;
 using LocResCore.Json.Commands;
 using LocResCore.Json.Translations;
 using LocResCore.Po.Translations;
+using LocResCore.SQLite.Translations;
 using LocResCore.Translations;
 using LocResLib;
 using LocResLib.Hashing;
@@ -449,11 +450,13 @@ namespace LocresConsole
             _translationReaderPool.RegisterReader(new ExcelTranslationReader());
             _translationReaderPool.RegisterReader(new JsonTranslationReader());
             _translationReaderPool.RegisterReader(new PoTranslationReader());
+            _translationReaderPool.RegisterReader(new SQLiteTranslationReader());
 
             _translationWriterPool.RegisterWriter(new CsvTranslationWriter());
             _translationWriterPool.RegisterWriter(new ExcelTranslationWriter());
             _translationWriterPool.RegisterWriter(new JsonTranslationWriter());
             _translationWriterPool.RegisterWriter(new PoTranslationWriter());
+            _translationWriterPool.RegisterWriter(new SQLiteTranslationWriter());
 
             var app = new CommandApp();
             app.Configure(_ =>

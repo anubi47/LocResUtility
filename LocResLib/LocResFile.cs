@@ -11,7 +11,7 @@ namespace LocResLib
 {
     public class LocResFile : IEnumerable<LocResNamespace>
     {
-        private static byte[] LOCRES_MAGIC = new byte[]{
+        private static readonly byte[] LOCRES_MAGIC = new byte[]{
             0x0E, 0x14, 0x74, 0x75, 0x67, 0x4A, 0x03, 0xFC, 0x4A, 0x15, 0x90, 0x9D, 0xC3, 0x37, 0x7F, 0x1B
         };
 
@@ -216,7 +216,7 @@ namespace LocResLib
                         writer.Write(Crc.StrCrc32(localizationNamespace.Name));
 
                     writer.WriteUnrealString(localizationNamespace.Name);
-                    writer.Write(localizationNamespace.Count); // int localizaedStringCounnt
+                    writer.Write(localizationNamespace.Count); // int localizedStringCount
 
                     foreach (var localizedString in localizationNamespace)
                     {

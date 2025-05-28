@@ -42,6 +42,11 @@ namespace LocResCore.Excel.Translations
 
         private void Write(IXLWorkbook workbook, TranslationPool pool)
         {
+            if (workbook is null)
+                throw new ArgumentNullException(nameof(workbook));
+            if (pool is null)
+                throw new ArgumentNullException(nameof(pool));
+
             foreach (TranslationItem culture in pool)
             {
                 Write(workbook, culture);
@@ -51,6 +56,11 @@ namespace LocResCore.Excel.Translations
 
         private void Write(IXLWorkbook workbook, TranslationItem item)
         {
+            if (workbook is null)
+                throw new ArgumentNullException(nameof(workbook));
+            if (item is null)
+                throw new ArgumentNullException(nameof(item));
+
             int processed = 0;
             int notProcessed = 0;
 
@@ -67,22 +77,6 @@ namespace LocResCore.Excel.Translations
             worksheet.Clear();
             worksheet.SheetView.FreezeRows(1);
             worksheet.SheetView.FreezeColumns(1);
-            worksheet.Row(1).Style.Fill.BackgroundColor = XLColor.LightGray;
-            worksheet.Row(1).Style.Font.Bold = true;
-            // I could protect the spreadsheet to avoid to make mistakes manually
-            // I realized that I passing lot of time to handle the protection manually
-            //worksheet.Column(1).Style.Protection.SetLocked(true);
-            //worksheet.Column(2).Style.Protection.SetLocked(true);
-            //worksheet.Column(3).Style.Protection.SetLocked(true);
-            //worksheet.Column(4).Style.Protection.SetHidden(true);
-            //worksheet.Column(5).Style.Protection.SetHidden(true);
-            //worksheet.Column(6).Style.Protection.SetLocked(false);
-            //worksheet.Protect()
-            //  .AllowElement(XLSheetProtectionElements.AutoFilter)
-            //  .AllowElement(XLSheetProtectionElements.FormatColumns)
-            //  .AllowElement(XLSheetProtectionElements.SelectLockedCells)
-            //  .AllowElement(XLSheetProtectionElements.SelectUnlockedCells)
-            //  .AllowElement(XLSheetProtectionElements.Sort);
             worksheet.Cell(1, 1).Value = "Sts.";
             worksheet.Cell(1, 2).Value = "Namespace";
             worksheet.Cell(1, 3).Value = "Key";
@@ -147,7 +141,12 @@ namespace LocResCore.Excel.Translations
             worksheet.Column(4).Hide();
             worksheet.Column(5).Hide();
             worksheet.Column(6).Width = 100;
-            worksheet.RangeUsed().SetAutoFilter();
+            string tableName = item.Culture.Replace('-', '_');
+            if (worksheet.Tables.Contains(tableName))
+            {
+                worksheet.Tables.Remove(tableName);
+            }
+            worksheet.RangeUsed().CreateTable(tableName);
 
             Log.Information($"Culture [{item.Culture}]. Wrote [{processed}/{item.Count}] resources.");
             if (notProcessed > 0)
@@ -189,21 +188,6 @@ namespace LocResCore.Excel.Translations
             //worksheet.Clear();
             worksheet.SheetView.FreezeRows(1);
             worksheet.SheetView.FreezeColumns(5);
-            worksheet.Row(1).Style.Fill.BackgroundColor = XLColor.LightGray;
-            worksheet.Row(1).Style.Font.Bold = true;
-            // I could protect the spreadsheet to avoid to make mistakes manually
-            // I realized that I passing lot of time to handle the protection manually
-            //worksheet.Column(1).Style.Protection.SetLocked(true);
-            //worksheet.Column(2).Style.Protection.SetLocked(true);
-            //worksheet.Column(3).Style.Protection.SetLocked(true);
-            //worksheet.Column(4).Style.Protection.SetHidden(true);
-            //worksheet.Column(5).Style.Protection.SetHidden(true);
-            //worksheet.Protect()
-            //  .AllowElement(XLSheetProtectionElements.AutoFilter)
-            //  .AllowElement(XLSheetProtectionElements.FormatColumns)
-            //  .AllowElement(XLSheetProtectionElements.SelectLockedCells)
-            //  .AllowElement(XLSheetProtectionElements.SelectUnlockedCells)
-            //  .AllowElement(XLSheetProtectionElements.Sort);
             worksheet.Cell(1, 1).Value = "Sts.";
             worksheet.Cell(1, 2).Value = "Namespace";
             worksheet.Cell(1, 3).Value = "Key";
@@ -270,7 +254,12 @@ namespace LocResCore.Excel.Translations
             worksheet.Column(4).AdjustToContents();
             worksheet.Column(4).Hide();
             worksheet.Column(5).Hide();
-            worksheet.RangeUsed().SetAutoFilter();
+            string tableName = "summary";
+            if (worksheet.Tables.Contains(tableName))
+            {
+                worksheet.Tables.Remove(tableName);
+            }
+            worksheet.RangeUsed().CreateTable(tableName);
         }
     }
 }
