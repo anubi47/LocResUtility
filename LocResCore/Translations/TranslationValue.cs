@@ -6,8 +6,8 @@ namespace LocResCore.Translations
     {
         public TranslationValue(string nameSpace, string key, uint hash, string originalValue, string value)
         {
-            if (string.IsNullOrWhiteSpace(nameSpace))
-                throw new ArgumentException("Argument should not be null, empty or consisting of white-space characters!", nameof(nameSpace));
+            if (nameSpace is null)
+                throw new ArgumentException("Argument should not be null!", nameof(nameSpace));
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentException("Argument should not be null, empty or consisting of white-space characters!", nameof(key));
             if (string.IsNullOrEmpty(value))

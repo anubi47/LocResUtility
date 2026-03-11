@@ -21,10 +21,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 
 namespace LocresConsole
 {
@@ -290,7 +290,7 @@ namespace LocresConsole
 
         internal sealed class ExportCommand : Command<ExportSettings>
         {
-            public override int Execute([NotNull] CommandContext context, [NotNull] ExportSettings settings)
+            public override int Execute(CommandContext context, ExportSettings settings, CancellationToken cancellationToken)
             {
                 if (!settings.SuppressPrompt && File.Exists(settings.OutputPath))
                     if (!AnsiConsole.Confirm($"File [[{Path.GetFileName(settings.OutputPath)}]] already exist. Overwrite?"))
@@ -307,7 +307,7 @@ namespace LocresConsole
 
         internal sealed class ImportCommand : Command<ImportSettings>
         {
-            public override int Execute([NotNull] CommandContext context, [NotNull] ImportSettings settings)
+            public override int Execute(CommandContext context, ImportSettings settings, CancellationToken cancellationToken)
             {
                 if (!settings.SuppressPrompt && File.Exists(settings.OutputPath))
                     if (!AnsiConsole.Confirm($"File [[{Path.GetFileName(settings.OutputPath)}]] already exist. Overwrite?"))
@@ -326,7 +326,7 @@ namespace LocresConsole
 
         internal sealed class MergeCommand : Command<MergeSettings>
         {
-            public override int Execute([NotNull] CommandContext context, [NotNull] MergeSettings settings)
+            public override int Execute(CommandContext context, MergeSettings settings, CancellationToken cancellationToken)
             {
                 if (!settings.SuppressPrompt && File.Exists(settings.OutputPath))
                     if (!AnsiConsole.Confirm($"File [[{Path.GetFileName(settings.OutputPath)}]] already exist. Overwrite?"))
@@ -344,7 +344,7 @@ namespace LocresConsole
 
         internal sealed class ScriptRunCommand : Command<ScriptRunSettings>
         {
-            public override int Execute([NotNull] CommandContext context, [NotNull] ScriptRunSettings settings)
+            public override int Execute(CommandContext context, ScriptRunSettings settings, CancellationToken cancellationToken)
             {
                 if (!settings.SuppressPrompt && File.Exists(settings.OutputPath))
                     if (!AnsiConsole.Confirm($"File [[{Path.GetFileName(settings.OutputPath)}]] already exist. Overwrite?"))
@@ -362,7 +362,7 @@ namespace LocresConsole
 
         internal sealed class ScriptTemplateCommand : Command<ScriptTemplateSettings>
         {
-            public override int Execute([NotNull] CommandContext context, [NotNull] ScriptTemplateSettings settings)
+            public override int Execute(CommandContext context, ScriptTemplateSettings settings, CancellationToken cancellationTokens)
             {
                 if (!settings.SuppressPrompt && File.Exists(settings.TemplatePath))
                     if (!AnsiConsole.Confirm($"File [[{Path.GetFileName(settings.TemplatePath)}]] already exist. Overwrite?"))
@@ -376,7 +376,7 @@ namespace LocresConsole
 
         internal sealed class ScriptCreateCommand : Command<ScriptCreateSettings>
         {
-            public override int Execute([NotNull] CommandContext context, [NotNull] ScriptCreateSettings settings)
+            public override int Execute(CommandContext context, ScriptCreateSettings settings, CancellationToken cancellationToken)
             {
                 if (!settings.SuppressPrompt && File.Exists(settings.OutputPath))
                     if (!AnsiConsole.Confirm($"File [[{Path.GetFileName(settings.OutputPath)}]] already exist. Overwrite?"))
@@ -392,7 +392,7 @@ namespace LocresConsole
 
         internal sealed class HashCommand : Command<HashSettings>
         {
-            public override int Execute([NotNull] CommandContext context, [NotNull] HashSettings settings)
+            public override int Execute(CommandContext context, HashSettings settings, CancellationToken cancellationToken)
             {
                 uint hash = Crc.StrCrc32(settings.Text);
                 Log.Information($"Value = {settings.Text}");
